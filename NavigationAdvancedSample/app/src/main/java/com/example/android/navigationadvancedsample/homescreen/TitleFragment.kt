@@ -28,14 +28,22 @@ import com.example.android.navigationadvancedsample.R
 /**
  * Shows the main title screen with a button that navigates to [About].
  */
-class Title : Fragment() {
+class TitleFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_title, container, false)
 
         view.findViewById<Button>(R.id.about_btn).setOnClickListener {
-            findNavController().navigate(R.id.action_title_to_about)
+            val bundle = Bundle()
+            bundle.putString("test","haha,你好")
+            findNavController().navigate(R.id.action_global_about, bundle)
+            /**
+             * 笔记
+             * 使用include包含其他导航图的方式，如A中引入B，全局action只能在A中，能够传递参数，但只能使用上面的方式，不能使用下面的方式
+             */
+//            findNavController().navigate(HomeDirections.actionGlobalAbout(), "haha")
+
         }
         return view
     }

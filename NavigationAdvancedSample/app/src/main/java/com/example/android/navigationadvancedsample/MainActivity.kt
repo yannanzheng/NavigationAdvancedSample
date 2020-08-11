@@ -17,12 +17,14 @@
 package com.example.android.navigationadvancedsample
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
+import androidx.lifecycle.*
 import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.android.synthetic.main.activity_main.*
 
 /**
  * An activity that inflates a layout that has a [BottomNavigationView].
@@ -37,6 +39,28 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             setupBottomNavigationBar()
         } // Else, need to wait for onRestoreInstanceState
+    }
+
+    fun navToSecondScreen(){
+        synchronized(this){
+            bottom_nav.selectedItemId = R.id.list
+
+            val controller = currentNavController?.value
+            val navHostFragment =
+                    supportFragmentManager.findFragmentByTag("bottomNavigation#1") as NavHostFragment
+            val backStackList = navHostFragment.childFragmentManager.fragments
+            val peekFragment = backStackList[backStackList.size - 1]
+            peekFragment?.lifecycle?.addObserver(object : LifecycleEventObserver {
+                override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                    if (event == Lifecycle.Event.ON_RESUME) {
+                        controller?.popBackStack(
+                                controller.graph.startDestination, false
+                        )
+                        peekFragment.lifecycle.removeObserver(this)
+                    }
+                }
+            })
+        }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
@@ -65,7 +89,7 @@ class MainActivity : AppCompatActivity() {
 
         // Whenever the selected controller changes, setup the action bar.
         controller.observe(this, Observer { navController ->
-            setupActionBarWithNavController(navController)
+            setupActionBarWithNavController(navController)//用于修改actionbar，每次页面切换，actionbar的字符标题改变
         })
         currentNavController = controller
     }
